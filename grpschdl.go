@@ -9,10 +9,11 @@ import (
 )
 
 func init() {
-  http.HandleFunc("/", handler)
+  http.HandleFunc("/", index)
+  http.HandleFunc("/top", top)
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func validateLogin(w http.ResponseWriter, r *http.Request) {
   c := appengine.NewContext(r)
   u := user.Current(c)
   if u == nil {
@@ -25,5 +26,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusFound)
     return
   }
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+  validateLogin(w, r)
+  http.Redirect(w, r, "/top", http.StatusMovedPermanently)
+}
+
+func top(w http.ResponseWriter, r *http.Request) {
+  validateLogin(w, r)
+  u := user.Current(appengine.NewContext(r))
   fmt.Fprintf(w, "Hello, %v!", u)
 }
